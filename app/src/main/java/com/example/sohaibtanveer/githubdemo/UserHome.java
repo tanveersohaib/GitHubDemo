@@ -56,27 +56,35 @@ public class UserHome extends AppCompatActivity
         setContentView(R.layout.activity_user_home);
 
         setContents();
+        if(isUserActive()==true) {
+            SharedPreferences pref = getSharedPreferences("user_data",MODE_PRIVATE);
+            userAccessToken = pref.getString("access_token",null);
+            getUser();
+        }
+        else {
+            String code = getCode();
+            if (code != null) {
+                final GitHubService service = RetrofitClient.getClient("https://github.com").create(GitHubService.class);
+                Call<AccessToken> call = service.getAccessToken("25a2190a925d5982a5ae", "feb32616d4c1331e755fe5a33193c3deafc4fa48", code);
+                call.enqueue(new Callback<AccessToken>() {
+                    @Override
+                    public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
+                        userAccessToken = response.body().getAccessToken();
+                        getUser();
 
-        String code = getCode();
+                        //saving user access token to shared preferences
+                        SharedPreferences pref = getSharedPreferences("user_data", MODE_PRIVATE);
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putString("access_token", userAccessToken);
+                        editor.commit();
+                    }
 
-        if (code != null) {
-            final GitHubService service = RetrofitClient.getClient("https://github.com").create(GitHubService.class);
-            Call<AccessToken> call = service.getAccessToken("25a2190a925d5982a5ae", "feb32616d4c1331e755fe5a33193c3deafc4fa48", code);
-            call.enqueue(new Callback<AccessToken>() {
-                @Override
-                public void onResponse(Call<AccessToken> call, Response<AccessToken> response) {
-                    userAccessToken = response.body().getAccessToken();
-                    getUser();
-                    SharedPreferences.Editor editor = getSharedPreferences("USER_DATA", MODE_PRIVATE).edit();
-                    editor.putString("accessToken", userAccessToken);
-                    editor.commit();
-                }
-
-                @Override
-                public void onFailure(Call<AccessToken> call, Throwable t) {
-                    Toast.makeText(getApplicationContext(),t.getMessage(), Toast.LENGTH_SHORT).show();
-                }
-            });
+                    @Override
+                    public void onFailure(Call<AccessToken> call, Throwable t) {
+                        Toast.makeText(getApplicationContext(), t.getMessage(), Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
         }
     }
 
@@ -213,5 +221,12 @@ public class UserHome extends AppCompatActivity
             code = intent.getData().getQueryParameter("code");
         }
         return code;
+    }
+    private boolean isUserActive(){
+        SharedPreferences pref = getSharedPreferences("user_data",MODE_PRIVATE);
+        if(pref.contains("access_token"))
+            return true;
+        else
+            return false;
     }
 }

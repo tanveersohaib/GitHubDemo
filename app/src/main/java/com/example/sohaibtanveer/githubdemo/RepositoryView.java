@@ -1,10 +1,12 @@
 package com.example.sohaibtanveer.githubdemo;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,19 +15,16 @@ import android.view.MenuItem;
 import android.widget.TextView;
 import android.widget.Toast;
 
-public class RepositoryView extends AppCompatActivity implements CodeFragment.OnFragmentInteractionListener,
-        IssuesFragment.OnFragmentInteractionListener,PullRequestsFragment.OnFragmentInteractionListener,
-        ReadmeFragment.OnFragmentInteractionListener,CodefilesFragment.OnFragmentInteractionListener,
-        ReleasesFragment.OnFragmentInteractionListener, ContributorsFragment.OnFragmentInteractionListener,
-        CommitsFragment.OnFragmentInteractionListener
-        {
+import com.squareup.otto.Subscribe;
+
+public class RepositoryView extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_repository_view);
         setBottomNavBar();
-
+        MainActivity.bus.register(this);
     }
 
     private void setBottomNavBar() {
@@ -41,10 +40,10 @@ public class RepositoryView extends AppCompatActivity implements CodeFragment.On
                                 selectedFragment = CodeFragment.newInstance();
                                 break;
                             case R.id.bottom_nav_issues:
-                                selectedFragment = IssuesFragment.newInstance("hey","hi");
+                                selectedFragment = IssuesFragment.newInstance();
                                 break;
                             case R.id.bottom_nav_pullReq:
-                                selectedFragment = PullRequestsFragment.newInstance("hey","hi");
+                                selectedFragment = PullRequestsFragment.newInstance();
                                 break;
                         }
                         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -63,14 +62,18 @@ public class RepositoryView extends AppCompatActivity implements CodeFragment.On
         //bottomNavigationView.getMenu().getItem(1).setChecked(true);
     }
 
-    @Override
-    public void onFragmentInteraction(int pos) {
-        String s = "Tab: " + pos;
-        Toast.makeText(this,s,Toast.LENGTH_LONG).show();
+    @Subscribe
+    public void fragmentListener(Fragment context){
+        if(context instanceof CodeFragment)
+            Toast.makeText(this,"CodeFragment",Toast.LENGTH_LONG).show();
+        else if(context instanceof IssuesFragment)
+            Toast.makeText(this,"IssuesFragment",Toast.LENGTH_LONG).show();
+        else if(context instanceof PullRequestsFragment)
+            Toast.makeText(this,"PullReqFragment",Toast.LENGTH_LONG).show();
+        else if(context instanceof CommitsFragment)
+            Toast.makeText(this,"CommitsFragment",Toast.LENGTH_LONG).show();
+        else if(context instanceof CodefilesFragment)
+            Toast.makeText(this,"CodeFilesFragment",Toast.LENGTH_LONG).show();
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-        }
+}
