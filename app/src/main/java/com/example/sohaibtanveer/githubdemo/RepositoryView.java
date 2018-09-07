@@ -11,6 +11,7 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class RepositoryView extends AppCompatActivity implements CodeFragment.OnFragmentInteractionListener,
         IssuesFragment.OnFragmentInteractionListener,PullRequestsFragment.OnFragmentInteractionListener,
@@ -37,7 +38,7 @@ public class RepositoryView extends AppCompatActivity implements CodeFragment.On
                         Fragment selectedFragment = null;
                         switch (item.getItemId()) {
                             case R.id.bottom_nav_code:
-                                selectedFragment = CodeFragment.newInstance("hey","hi");
+                                selectedFragment = CodeFragment.newInstance();
                                 break;
                             case R.id.bottom_nav_issues:
                                 selectedFragment = IssuesFragment.newInstance("hey","hi");
@@ -55,7 +56,7 @@ public class RepositoryView extends AppCompatActivity implements CodeFragment.On
 
         //Manually displaying the first fragment - one time only
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-        transaction.replace(R.id.frame_layout, CodeFragment.newInstance("hey","hi"));
+        transaction.replace(R.id.frame_layout, CodeFragment.newInstance());
         transaction.commit();
 
         //Used to select an item programmatically
@@ -63,8 +64,13 @@ public class RepositoryView extends AppCompatActivity implements CodeFragment.On
     }
 
     @Override
+    public void onFragmentInteraction(int pos) {
+        String s = "Tab: " + pos;
+        Toast.makeText(this,s,Toast.LENGTH_LONG).show();
+    }
+
+    @Override
     public void onFragmentInteraction(Uri uri) {
 
     }
-
-}
+        }
