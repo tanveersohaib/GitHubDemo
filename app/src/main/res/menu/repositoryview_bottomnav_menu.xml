@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/bottom_nav_code"
+        android:icon="@drawable/ic_codeicon"
+        android:title="@string/codeIconName"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/bottom_nav_issues"
+        android:icon="@drawable/ic_issuesicon"
+        android:title="@string/issuesIconName"
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/bottom_nav_pullReq"
+        android:icon="@drawable/ic_pullrequestsicon"
+        android:title="@string/pullReqIconName"
+        app:showAsAction="always"/>
+
+</menu>
