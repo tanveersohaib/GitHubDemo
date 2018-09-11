@@ -11,6 +11,9 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
 import java.util.List;
 
 import retrofit2.Call;
@@ -66,7 +69,9 @@ public class SearchResultsActivity extends AppCompatActivity implements ItemClic
     @Override
     public void onClick(View v,Item repo){
         Intent i = new Intent(this,RepositoryView.class);
-        i.putExtra("pos",repo.getFullName());
+        Gson gson = new Gson();
+        String repoJsonString = gson.toJson(repo);
+        i.putExtra("repository",repoJsonString);
         startActivity(i);
     }
 

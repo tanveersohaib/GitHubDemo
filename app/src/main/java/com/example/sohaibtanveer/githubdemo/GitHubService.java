@@ -1,5 +1,7 @@
 package com.example.sohaibtanveer.githubdemo;
 
+import java.util.List;
+
 import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -10,6 +12,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 public interface GitHubService {
 
@@ -24,5 +27,11 @@ public interface GitHubService {
 
     @GET("/user?")
     Call<User> getUser(@Query("access_token") String token);
+
+    @GET
+    Call<ReadmeObject> getReadmeObject(@Url String url,@Query("access_token") String accessToken);
+
+    @GET
+    Call<List<Directory>> getFiles(@Url String url,@Query("access_token") String accessToken);
 
 }
