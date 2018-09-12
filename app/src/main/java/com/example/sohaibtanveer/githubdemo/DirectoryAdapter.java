@@ -9,22 +9,26 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class DirectoryAdapter extends RecyclerView.Adapter<DirectoryAdapter.CustomViewHolder> {
 
     private List<Directory> itemList;
-    private DirectoryClickListener dirClickListener;
+    //private DirectoryClickListener dirClickListener;
+    private String ref;
 
-    public DirectoryAdapter(List<Directory> dir){
+    public DirectoryAdapter(List<Directory> dir,String ref){
+        this.ref = ref;
         itemList = dir;
     }
 
-    public void setClickListener(DirectoryClickListener dirClickListener){
-        this.dirClickListener = dirClickListener;
-    }
+    //public void setClickListener(DirectoryClickListener dirClickListener){
+    //    this.dirClickListener = dirClickListener;
+    //}
 
     class CustomViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
@@ -41,7 +45,16 @@ public class DirectoryAdapter extends RecyclerView.Adapter<DirectoryAdapter.Cust
 
         @Override
         public void onClick(View v) {
-            dirClickListener.onclick(v,itemList.get(getAdapterPosition()));
+            //dirClickListener.onclick(v,itemList.get(getAdapterPosition()));
+            Gson gson = new Gson();
+            ArrayList<String> data = new ArrayList<String>();
+            data.add(gson.toJson(itemList.get(getAdapterPosition())));
+            data.add(ref);
+            Communicator com = new Communicator();
+            com.setTypeOfData("directory_data");
+            com.setObj(data);
+            MainActivity.bus.register(this);
+            MainActivity.bus.post(com);
         }
     }
 
@@ -66,6 +79,12 @@ public class DirectoryAdapter extends RecyclerView.Adapter<DirectoryAdapter.Cust
 
     @Override
     public int getItemCount() {
-        return itemList.size();
+        return itemList==null? 0 : itemList.size();
+    }
+
+    public void loadData(List<Directory> items,String ref){
+        this.itemList = items;
+        this.ref = ref;
+        this.notifyDataSetChanged();
     }
 }

@@ -13,15 +13,17 @@ import java.util.List;
 public class PathRecyclerViewAdapter extends RecyclerView.Adapter<PathRecyclerViewAdapter.CustomViewHolder> {
 
     private ArrayList<String> items;
-    private PathClickListener clickListener;
+    //private StringClickListener clickListener;
+    private String ref;
 
-    PathRecyclerViewAdapter(ArrayList<String> items){
+    PathRecyclerViewAdapter(ArrayList<String> items,String ref){
         this.items = items;
+        this.ref = ref;
     }
 
-    public void setClickListener(PathClickListener clickListener) {
-        this.clickListener = clickListener;
-    }
+    //public void setClickListener(StringClickListener clickListener) {
+    //    this.clickListener = clickListener;
+    //}
 
     class CustomViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
@@ -31,12 +33,33 @@ public class PathRecyclerViewAdapter extends RecyclerView.Adapter<PathRecyclerVi
             super(itemView);
             itemView.setOnClickListener(this);
             pathName = (TextView) itemView.findViewById(R.id.pathName);
+            MainActivity.bus.register(this);
         }
 
         @Override
         public void onClick(View v) {
-            clickListener.onclick(v,items.get(getAdapterPosition()));
+            //clickListener.onclick(v,items.get(getAdapterPosition()));
+            Communicator com = new Communicator();
+            ArrayList<String> data = new ArrayList<String>();
+            String path = generatePath(getAdapterPosition());
+            data.add(path);
+            data.add(ref);
+            com.setTypeOfData("path_information");
+            com.setObj(data);
+            MainActivity.bus.post(com);
+            removeItem(getAdapterPosition());
         }
+    }
+
+    private String generatePath(int index){
+        if(items!=null){
+            String path = "";
+            for(int i=1; i<=index ;i++){
+                path = path + items.get(i) +"/";
+            }
+            return path;
+        }
+        return null;
     }
 
     @NonNull
@@ -64,13 +87,17 @@ public class PathRecyclerViewAdapter extends RecyclerView.Adapter<PathRecyclerVi
         this.notifyDataSetChanged();
     }
 
-    public void removeItem(String pathName){
-        int index = items.indexOf(pathName);
+    public void removeItem(int index){
         int size = items.size();
-        for(int i = size - 1; i >=index;i--){
-            items.remove(i);
+        for(int i = size - 1; i >index;i--){
+            //if(!items.get(i).equals("root"))
+                items.remove(i);
         }
         this.notifyDataSetChanged();
+    }
+
+    public void reset(ArrayList<String> items){
+        this.items =items;
     }
 
 }

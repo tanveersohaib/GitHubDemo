@@ -3,12 +3,9 @@ package com.example.sohaibtanveer.githubdemo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,14 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.webkit.WebView;
-import android.widget.Button;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,12 +30,17 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class CodeFragment extends Fragment implements DirectoryClickListener,PathClickListener{
+public class CodeFragment extends Fragment {
 
     private static Item repository;
     private static View rootView;
-    private PathRecyclerViewAdapter adapter;
     private String accessToken;
+
+    private RecyclerView recyclerViewDirectory;
+    private DirectoryAdapter directoryAdapter;
+
+    private RecyclerView recyclerViewPath;
+    private PathRecyclerViewAdapter adapterPath;
 
     public CodeFragment() {
         // Required empty public constructor
@@ -60,6 +58,10 @@ public class CodeFragment extends Fragment implements DirectoryClickListener,Pat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         initializeAccessToken();
+        recyclerViewDirectory = null;
+        directoryAdapter = null;
+        adapterPath = null;
+        recyclerViewPath = null;
     }
 
     @Override
@@ -91,9 +93,14 @@ public class CodeFragment extends Fragment implements DirectoryClickListener,Pat
                 viewPager.setCurrentItem(tab.getPosition());
                 if(tab.getPosition() == 0) //Readme
                     getReadmeUrl();
-                else if(tab.getPosition() == 1) { //Code files
-                    createPathRecyclerView();
-                    getCodeFiles(null);
+                else if(tab.getPosition() == 1) {//Code files
+                    SharedPreferences pref = getActivity().getSharedPreferences("repo_data",Context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putString("access_token",accessToken);
+                    editor.putString("repo_name",repository.getFullName());
+                    editor.commit();
+                    createPathRecyclerView("master");
+                    getCodeFiles(null,"master");
                 }
             }
 
@@ -173,19 +180,19 @@ public class CodeFragment extends Fragment implements DirectoryClickListener,Pat
         }
     }
 
-    private void getCodeFiles(String dir){
+    private void getCodeFiles(String dir,final String ref){
         GitHubService serviceUser = RetrofitClient.getClient("https://api.github.com").create(GitHubService.class);
         Call<List<Directory>> directory;
         if(dir == null)
-             directory = serviceUser.getFiles("/repos/" + repository.getFullName() + "/contents",accessToken);
+             directory = serviceUser.getFiles("/repos/" + repository.getFullName() + "/contents",ref,accessToken);
         else if(dir.equals("root"))
-            directory = serviceUser.getFiles("/repos/" + repository.getFullName() + "/contents",accessToken);
+            directory = serviceUser.getFiles("/repos/" + repository.getFullName() + "/contents",ref,accessToken);
         else
-            directory = serviceUser.getFiles("/repos/"+ repository.getFullName() + "/contents/" + dir + "?ref=master",accessToken);
+            directory = serviceUser.getFiles("/repos/"+ repository.getFullName() + "/contents/" + dir ,ref,accessToken);
         directory.enqueue(new Callback<List<Directory>>() {
             @Override
             public void onResponse(Call<List<Directory>> call, Response<List<Directory>> response) {
-                loadCodeFiles(response.body());
+                loadCodeFiles(response.body(),ref);
             }
 
             @Override
@@ -196,50 +203,96 @@ public class CodeFragment extends Fragment implements DirectoryClickListener,Pat
 
     }
 
-    private void loadCodeFiles(List<Directory> directories){
-        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.directoryRecyclerView);
-        DirectoryAdapter adapter = new DirectoryAdapter(directories);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
-        adapter.setClickListener(this);
+    private void loadCodeFiles(List<Directory> directories,String ref){
+        if(directories != null) {
+            if(directoryAdapter == null) {
+                recyclerViewDirectory = (RecyclerView) getActivity().findViewById(R.id.directoryRecyclerView);
+                directoryAdapter = new DirectoryAdapter(directories, ref);
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity());
+                recyclerViewDirectory.setLayoutManager(layoutManager);
+                recyclerViewDirectory.setAdapter(directoryAdapter);
+            }
+            else
+                directoryAdapter.loadData(directories,ref);
+        }
     }
 
-    private void createPathRecyclerView(){
+    private void createPathRecyclerView(String ref){
 
         ArrayList<String> paths = new ArrayList<String>();
         paths.add("root");
-
-        RecyclerView recyclerView = (RecyclerView) getActivity().findViewById(R.id.pathRecyclerView);
-        adapter = new PathRecyclerViewAdapter(paths);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(),LinearLayoutManager.HORIZONTAL,false);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
-        adapter.setClickListener(this);
+        if(adapterPath == null) {
+            recyclerViewPath = (RecyclerView) getActivity().findViewById(R.id.pathRecyclerView);
+            adapterPath = new PathRecyclerViewAdapter(paths, ref);
+            RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.HORIZONTAL, false);
+            recyclerViewPath.setLayoutManager(layoutManager);
+            recyclerViewPath.setAdapter(adapterPath);
+        }
+        else
+            adapterPath.reset(paths);
     }
 
     private void addNewPath(String newPath){
-        adapter.addItem(newPath);
+        adapterPath.addItem(newPath);
     }
 
     //Directory
-    @Override
+    /*@Override
     public void onclick(View v, Directory dir) {
         String type = dir.getType();
         if(type.equals("dir")){
             addNewPath(dir.getName());
-            getCodeFiles(dir.getPath());
+            getCodeFiles(dir.getPath(),);
         }
         else if(type.equals("file")){
             Intent intent = new Intent(getActivity(),FileViewActivity.class);
             intent.putExtra("url",dir.getDownloadUrl());
             startActivity(intent);
         }
+    }*/
+
+    @Subscribe void changeDirectory(Communicator com){
+        if(com.getTypeOfData().equals("directory_data")){
+            ArrayList<String> data = (ArrayList<String>) com.getObj();
+            Gson gson = new Gson();
+            Directory dir = gson.fromJson(data.get(0),Directory.class);
+            String ref = data.get(1);
+            String type = dir.getType();
+            if(type.equals("dir")){
+                addNewPath(dir.getName());
+                getCodeFiles(dir.getPath(),ref);
+            }
+            else if(type.equals("file")){
+                Intent intent = new Intent(getActivity(),FileViewActivity.class);
+                intent.putExtra("url",dir.getDownloadUrl());
+                startActivity(intent);
+            }
+        }
     }
-    //Path
+
+    /*//Path
     @Override
     public void onclick(View v, String path) {
         adapter.removeItem(path);
-        getCodeFiles(path);
+        getCodeFiles(path,);
+    }*/
+
+    @Subscribe
+    public void changePath(Communicator com){
+        if(com.getTypeOfData().equals("path_information")){
+            ArrayList<String> data = (ArrayList<String>) com.getObj();
+            getCodeFiles(data.get(0),data.get(1));
+        }
     }
+
+    //Branch handler
+    @Subscribe
+    public void changeBranch(Communicator com){
+        if(com.getTypeOfData().equals("branch_reference")){
+            String ref = (String) com.getObj();
+            createPathRecyclerView(ref);
+            getCodeFiles(null,ref);
+        }
+    }
+
 }

@@ -76,4 +76,9 @@ public class RepositoryAdapter extends RecyclerView.Adapter<RepositoryAdapter.Cu
         public int getItemCount() {
             return dataList.size();
         }
+
+        public void loadData(List<Item> data){
+            dataList = data;
+            this.notifyDataSetChanged();
+        }
 }

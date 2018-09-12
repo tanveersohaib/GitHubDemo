@@ -32,6 +32,12 @@ public interface GitHubService {
     Call<ReadmeObject> getReadmeObject(@Url String url,@Query("access_token") String accessToken);
 
     @GET
-    Call<List<Directory>> getFiles(@Url String url,@Query("access_token") String accessToken);
+    Call<List<Directory>> getFiles(@Url String url,@Query("ref") String ref,@Query("access_token") String accessToken);
+
+    @GET
+    Call<List<RepoBranchPOJO>> getBranches(@Url String url,@Query("access_token") String access_token);
+
+    @GET
+    Call<List<TagsPOJO>> getTags(@Url String url,@Query("access_token") String access_token);
 
 }

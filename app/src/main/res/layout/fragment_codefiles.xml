@@ -5,11 +5,35 @@
     android:layout_height="match_parent"
     tools:context=".CodefilesFragment">
 
+    <ImageView
+        android:id="@+id/branchIcon"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentStart="true"
+        android:layout_width="24sp"
+        android:layout_height="24sp"
+        android:background="@mipmap/ic_fork_logo"/>
+
+    <TextView
+        android:id="@+id/branchName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Master"
+        android:layout_marginTop="2dp"
+        android:layout_marginLeft="10dp"
+        android:layout_toEndOf="@id/branchIcon"/>
+
+    <ImageButton
+        android:id="@+id/changeBranch"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:background="@drawable/ic_keyboard_arrow_down_black_24dp"/>
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/pathRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"/>
+        android:layout_below="@id/branchIcon"/>
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/directoryRecyclerView"

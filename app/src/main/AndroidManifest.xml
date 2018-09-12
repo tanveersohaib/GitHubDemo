@@ -56,7 +56,10 @@
                 android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".RepositoryView" />
-        <activity android:name=".FileViewActivity"></activity>
+        <activity android:name=".FileViewActivity" />
+        <activity android:name=".SwitchBranchActivity"
+            android:theme="@style/myDialogTheme"
+            android:excludeFromRecents="true"></activity>
     </application>
 
 </manifest>

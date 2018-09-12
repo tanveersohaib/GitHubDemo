@@ -185,6 +185,9 @@ public class UserHome extends AppCompatActivity
         if (id == R.id.action_settings) {
             return true;
         }
+        else if(id == R.id.action_logout){
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }

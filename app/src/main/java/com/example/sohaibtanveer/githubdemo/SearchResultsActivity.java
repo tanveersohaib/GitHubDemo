@@ -22,11 +22,16 @@ import retrofit2.Response;
 
 public class SearchResultsActivity extends AppCompatActivity implements ItemClickListener{
 
+    private RecyclerView recyclerView;
+    private RepositoryAdapter adapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_search_results);
         handleIntent(getIntent());
+        recyclerView = null;
+        adapter = null;
     }
 
     @Override
@@ -58,12 +63,18 @@ public class SearchResultsActivity extends AppCompatActivity implements ItemClic
     }
 
     private void generateList(List<Item> data){
-        RecyclerView recyclerView = findViewById(R.id.resultRecyclerView);
-        RepositoryAdapter adapter = new RepositoryAdapter(this,data);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(SearchResultsActivity.this);
-        recyclerView.setLayoutManager(layoutManager);
-        recyclerView.setAdapter(adapter);
-        adapter.setClickListener(this);
+        if(data != null) {
+            if (adapter == null) {
+                recyclerView = findViewById(R.id.resultRecyclerView);
+                adapter = new RepositoryAdapter(this, data);
+                RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(SearchResultsActivity.this);
+                recyclerView.setLayoutManager(layoutManager);
+                recyclerView.setAdapter(adapter);
+                adapter.setClickListener(this);
+            }
+            else
+                adapter.loadData(data);
+        }
     }
 
     @Override
