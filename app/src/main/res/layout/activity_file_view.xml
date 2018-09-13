@@ -5,11 +5,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".FileViewActivity">
-
-    <WebView
-        android:id="@+id/fileWebView"
+    <br.tiagohm.markdownview.MarkdownView
+        android:id="@+id/fileMarkdownView"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        app:escapeHtml="false">
 
-    </WebView>
+    </br.tiagohm.markdownview.MarkdownView>
 </android.support.constraint.ConstraintLayout>

@@ -55,7 +55,6 @@ public class CodefilesFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        MainActivity.bus.post(this);
     }
 
     @Override

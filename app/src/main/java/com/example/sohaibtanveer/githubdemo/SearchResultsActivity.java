@@ -1,5 +1,6 @@
 package com.example.sohaibtanveer.githubdemo;
 
+import android.app.ProgressDialog;
 import android.app.SearchManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -25,6 +26,8 @@ public class SearchResultsActivity extends AppCompatActivity implements ItemClic
     private RecyclerView recyclerView;
     private RepositoryAdapter adapter;
 
+    private ProgressDialog progressDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,6 +45,10 @@ public class SearchResultsActivity extends AppCompatActivity implements ItemClic
 
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            progressDialog = new ProgressDialog(this);
+            progressDialog.setMessage("Loading...");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            progressDialog.show();
             String query = intent.getStringExtra(SearchManager.QUERY);
             //use the query to search your data somehow
             final GitHubService service = RetrofitClient.getClient("https://api.github.com").create(GitHubService.class);
@@ -63,6 +70,7 @@ public class SearchResultsActivity extends AppCompatActivity implements ItemClic
     }
 
     private void generateList(List<Item> data){
+        progressDialog.dismiss();
         if(data != null) {
             if (adapter == null) {
                 recyclerView = findViewById(R.id.resultRecyclerView);

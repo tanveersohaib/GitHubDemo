@@ -5,6 +5,8 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.webkit.WebView;
 
+import br.tiagohm.markdownview.MarkdownView;
+
 public class FileViewActivity extends AppCompatActivity {
 
     @Override
@@ -13,9 +15,9 @@ public class FileViewActivity extends AppCompatActivity {
         setContentView(R.layout.activity_file_view);
         Intent intent = getIntent();
         String url = intent.getExtras().getString("url");
-        WebView webview = (WebView) findViewById(R.id.fileWebView);
+        MarkdownView mdView = (MarkdownView) findViewById(R.id.fileMarkdownView);
         if(url!=null)
-            webview.loadUrl(url);
+            mdView.loadMarkdownFromUrl(url);
 
     }
 }
